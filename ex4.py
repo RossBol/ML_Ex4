@@ -26,4 +26,6 @@ onesX = np.ones((numOfImagesTrainSet, numOfPixels + 1))
 onesX[:,:-1] = X_train
 X_train = onesX
 
+w = np.random.rand(10, numOfPixels + 1)  # random weights matrix
+
 print("done")
