@@ -4,6 +4,7 @@ from sklearn.datasets import fetch_openml
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.utils import check_random_state
+import numpy as np
 
 mnist = fetch_openml('mnist_784')
 X = mnist['data'].astype('float64')
@@ -18,3 +19,11 @@ scaler = StandardScaler() # the next lines standardize the images
 X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
 
+# next lines add column of ones to train set for bias
+numOfImagesTrainSet = len(X_train)
+numOfPixels = len(X_train[0])
+onesX = np.ones((numOfImagesTrainSet, numOfPixels + 1))
+onesX[:,:-1] = X_train
+X_train = onesX
+
+print("done")
