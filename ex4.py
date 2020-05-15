@@ -19,6 +19,12 @@ scaler = StandardScaler() # the next lines standardize the images
 X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
 
+# next lines turn y_train to one-hot
+y_train = y_train.astype(int)
+yOneHot = np.zeros((y_train.size, 10))
+yOneHot[np.arange(y_train.size), y_train] = 1
+y_train = yOneHot.astype(object)
+
 # next lines add column of ones to train set for bias
 numOfImagesTrainSet = len(X_train)
 numOfPixels = len(X_train[0])
