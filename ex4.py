@@ -26,7 +26,27 @@ def classify(w, x):
     ln_y_matrix = np.transpose(ln_y_matrix)
     classifications = np.zeros_like(ln_y_matrix)
     classifications[np.arange(len(ln_y_matrix)), ln_y_matrix.argmax(1)] = 1
-    return classifications
+    return np.transpose(classifications)
+
+
+def accuracy_calc(classifications, y):
+    accuracy = classifications + y
+    return (accuracy == 2).sum() / len(classifications)
+
+
+def bias_set(x):
+    num_of_images = len(x)
+    num_of_pixels = len(x[0])
+    ones_x = np.ones((num_of_images, num_of_pixels + 1))
+    ones_x[:, :-1] = x
+    return ones_x
+
+
+def one_hot(y):
+    y = y.astype(int)
+    y_one_hot = np.zeros((y.size, 10))
+    y_one_hot[np.arange(y.size), y] = 1
+    return y_one_hot.astype(object)
 
 
 def main():
@@ -43,24 +63,20 @@ def main():
     x_train = scaler.fit_transform(x_train)
     x_test = scaler.transform(x_test)
 
-    # next lines turn y_train to one-hot
-    y_train = y_train.astype(int)
-    y_one_hot = np.zeros((y_train.size, 10))
-    y_one_hot[np.arange(y_train.size), y_train] = 1
-    y_train = y_one_hot.astype(object)
+    # next lines turn y_train and y_test to one-hot
+    y_train = one_hot(y_train)
+    y_test = one_hot(y_test)
 
-    # next lines add column of ones to train set for bias
-    num_of_images_train_set = len(x_train)
-    num_of_pixels = len(x_train[0])
-    ones_x = np.ones((num_of_images_train_set, num_of_pixels + 1))
-    ones_x[:,:-1] = x_train
-    x_train = ones_x
+    # next lines add column of ones to train set and test set for bias
+    x_train = bias_set(x_train)
+    x_test = bias_set(x_test)
 
-    w = np.random.rand(num_of_pixels + 1, 10)  # random weights matrix
+    w = np.random.rand(len(x_test[0]), 10)  # random weights matrix
 
     e = e_func(y_train, w, np.transpose(x_train))
 
-    test_set_classifications = classify(w, x_train)
+    test_set_classifications = classify(w, x_test)
+    accuracy = accuracy_calc(np.transpose(test_set_classifications), y_test)
 
     print("done")
 
