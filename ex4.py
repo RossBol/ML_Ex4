@@ -21,6 +21,14 @@ def ln_y(w, x):
     return np.log(numerator) - np.log(denominator)
 
 
+def classify(w, x):
+    ln_y_matrix = ln_y(np.transpose(w), np.transpose(x))
+    ln_y_matrix = np.transpose(ln_y_matrix)
+    classifications = np.zeros_like(ln_y_matrix)
+    classifications[np.arange(len(ln_y_matrix)), ln_y_matrix.argmax(1)] = 1
+    return classifications
+
+
 def main():
     mnist = fetch_openml('mnist_784')
     X = mnist['data'].astype('float64')
@@ -51,6 +59,8 @@ def main():
     w = np.random.rand(num_of_pixels + 1, 10)  # random weights matrix
 
     e = e_func(y_train, w, np.transpose(x_train))
+
+    test_set_classifications = classify(w, x_train)
 
     print("done")
 
