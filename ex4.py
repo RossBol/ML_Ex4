@@ -5,6 +5,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.utils import check_random_state
 import numpy as np
+from scipy.special import logsumexp
+
+np.random.seed(777)
+eta = 0.01
 
 
 def e_func(t, w, x):
@@ -14,11 +18,11 @@ def e_func(t, w, x):
 
 def ln_y(w, x):
     numerator = np.matmul(w, x)
-    numerator = np.exp(numerator)
-    denominator = numerator.sum(axis=0)
+    numerator = numerator #np.exp(numerator)
+    denominator = logsumexp(numerator, axis=0)#numerator.sum(axis=0)
     denominator = np.expand_dims(denominator, axis=0)
     denominator = np.repeat(a=denominator, repeats=10, axis=0)
-    return np.log(numerator) - np.log(denominator)
+    return numerator - denominator #enp.log(numerator) - np.log(denominator)
 
 
 def classify(w, x):
@@ -49,6 +53,10 @@ def one_hot(y):
     return y_one_hot.astype(object)
 
 
+def grad_e(x, y, t):
+    return np.matmul(np.transpose(x), np.transpose(y) - t)
+
+
 def main():
     mnist = fetch_openml('mnist_784')
     X = mnist['data'].astype('float64')
@@ -74,11 +82,31 @@ def main():
     w = np.random.rand(len(x_test[0]), 10)  # random weights matrix
 
     e = e_func(y_train, w, np.transpose(x_train))
-
+    print("Initial error is ", e)
     test_set_classifications = classify(w, x_test)
     accuracy = accuracy_calc(np.transpose(test_set_classifications), y_test)
+    print("Initial accuracy is ", accuracy)
+    prev_accuracy = 0
+    i = 0
+    while accuracy - prev_accuracy > 0.001:
+        i = i + 1
+        print("Loop number ", i)
+        prev_accuracy = accuracy
+        train_set_classifications = classify(w, x_train)
+        gradient = grad_e(x_train, train_set_classifications, y_train)
+        gradient = gradient.astype(float)
+        w = w - eta * gradient
+        test_set_classifications = classify(w, x_test)
+        accuracy = accuracy_calc(np.transpose(test_set_classifications), y_test)
+        print("Accuracy is ", accuracy)
 
-    print("done")
+    train_set_classifications = classify(w, x_train)
+    train_accuracy = accuracy_calc(np.transpose(train_set_classifications), y_train)
+    e = e_func(y_train, w, np.transpose(x_train))
+    print("Done, final accuracy on test set is ", accuracy)
+    print("Final accuracy on train set is ", train_accuracy)
+    print("Final error is ", e)
+    print("Bye!")
 
 
 if __name__ == "__main__":
