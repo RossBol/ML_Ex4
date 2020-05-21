@@ -18,11 +18,10 @@ def e_func(t, w, x):
 
 def ln_y(w, x):
     numerator = np.matmul(w, x)
-    numerator = numerator #np.exp(numerator)
-    denominator = logsumexp(numerator, axis=0)#numerator.sum(axis=0)
+    denominator = logsumexp(numerator, axis=0)
     denominator = np.expand_dims(denominator, axis=0)
     denominator = np.repeat(a=denominator, repeats=10, axis=0)
-    return numerator - denominator #enp.log(numerator) - np.log(denominator)
+    return numerator - denominator
 
 
 def classify(w, x):
