@@ -11,11 +11,6 @@ np.random.seed(777)
 eta = 0.01
 
 
-def e_func(t, w, x):
-    ln_y_mat = ln_y(np.transpose(w), x)
-    return - np.matmul(np.transpose(t), np.transpose(ln_y_mat)).sum()
-
-
 def ln_y(w, x):
     numerator = np.matmul(w, x)
     denominator = logsumexp(numerator, axis=0)
@@ -80,31 +75,27 @@ def main():
 
     w = np.random.rand(len(x_test[0]), 10)  # random weights matrix
 
-    e = e_func(y_train, w, np.transpose(x_train))
-    print("Initial error is ", e)
     test_set_classifications = classify(w, x_test)
     accuracy = accuracy_calc(np.transpose(test_set_classifications), y_test)
     print("Initial accuracy is ", accuracy)
     prev_accuracy = 0
     i = 0
-    while accuracy - prev_accuracy > 0.001:
+    while accuracy - prev_accuracy > 0.001:  # keep loop until reach improvement of classification of under 0.1% on test set
         i = i + 1
         print("Loop number ", i)
         prev_accuracy = accuracy
         train_set_classifications = classify(w, x_train)
         gradient = grad_e(x_train, train_set_classifications, y_train)
         gradient = gradient.astype(float)
-        w = w - eta * gradient
+        w = w - eta * gradient  # new weights calculation
         test_set_classifications = classify(w, x_test)
         accuracy = accuracy_calc(np.transpose(test_set_classifications), y_test)
         print("Accuracy is ", accuracy)
 
     train_set_classifications = classify(w, x_train)
     train_accuracy = accuracy_calc(np.transpose(train_set_classifications), y_train)
-    e = e_func(y_train, w, np.transpose(x_train))
     print("Done, final accuracy on test set is ", accuracy)
     print("Final accuracy on train set is ", train_accuracy)
-    print("Final error is ", e)
     print("Bye!")
 
 
